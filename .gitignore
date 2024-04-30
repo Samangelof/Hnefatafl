@@ -1,0 +1,14 @@
+# Ignore compiled Python files
+*.pyc
+
+# Ignore the virtual environment directory
+venv/
+
+# Poetry
+poetry.lock
+__pypackages__/
+
+# Alembic
+alembic.ini
+alembic/versions/*.pyc
+alembic/versions/*.py

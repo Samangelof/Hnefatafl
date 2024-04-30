@@ -1,0 +1,61 @@
+/* Общие стили */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #20183a;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(9, 50px);
+    /* 9 столбцов по 50px */
+    grid-template-rows: repeat(9, 50px);
+    /* 9 строк по 50px */
+    gap: 1px;
+    width: 460px;
+    /* Общая ширина доски */
+    height: 462px;
+    /* Общая высота доски */
+    margin: 20px auto;
+    border: 2px solid #333;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+}
+
+.cell {
+    background-color: #fff;
+    border: 1px solid #333;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* фигуры */
+.attacker {
+    color: red;
+    /* цвет  атакующей стороны */
+}
+
+.defender {
+    color: #000;
+    /* цвет защитной стороны */
+}
+
+.selected {
+    background-color: #004d99; /* Темно-синий цвет для выбранной фигуры */
+    color: #fff; /* Белый цвет текста */
+    text-shadow:
+        0 0 7px #fff,
+        0 0 10px #fff,
+        0 0 21px #fff,
+        0 0 42px #004d99,
+        0 0 82px #004d99,
+        0 0 92px #004d99,
+        0 0 102px #004d99,
+        0 0 151px #004d99;
+}

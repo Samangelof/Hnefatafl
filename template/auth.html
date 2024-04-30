@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/auth.css">
+    <title>Авторизация в игре Хнефатафл</title>
+
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fa fa-lock"></i>Вход в игру Хнефатафл</h1>
+        <form method="POST" action="{{ url_for('register') }}">
+            <label for="nickname">Никнейм:</label>
+            <input type="text" id="nickname" name="nickname" required>
+            <label for="password_hash">Пароль:</label>
+            <input type="password" id="password_hash" name="password_hash" required>
+            <button type="submit">Войти</button>
+        </form>
+    </div>
+</body>
+</html>
