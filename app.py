@@ -1,16 +1,26 @@
 from flask import Flask, render_template, redirect, url_for, request, jsonify
 from flask_bcrypt import Bcrypt
-from models import Piece, Board, Player, db
+from flask_socketio import SocketIO, emit, disconnect
+from flask_migrate import Migrate
+from models import Piece, Board, Player, db, WebSocketConnection
+
 
 app = Flask(__name__, template_folder='template')
 bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SECRET_KEY'] = 'uor=^_tbh_4cfmf-8g4@g$c&v2u!e$q1m_ots_$a*30x83#40v' # .env
 db.init_app(app)
 board = Board()
+socketio = SocketIO(app)
+migrate = Migrate(app, db)
 
 @app.route('/', methods=['GET'])
 def show_register_form():
     return render_template('auth.html')
+
+@app.route('/menu', methods=['GET'])
+def menu():
+    return render_template('main_menu.html')
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -115,5 +125,36 @@ def move_piece(from_row, from_col, to_row, to_col, player_type):
 
     return jsonify(response_data)
 
+# Получить никнейм из базы данных
+def get_user_id_from_database(nickname):
+    player = Player.query.filter_by(nickname=nickname).first()
+    if player:
+        return player.id
+    return None
+
+@socketio.on('connect')
+def handle_connect():
+    user_id = get_user_id_from_database()
+    socket_id = request.sid
+    connection = WebSocketConnection(user_id=user_id, socket_id=socket_id)
+    db.session.add(connection)
+    db.session.commit()
+    emit('connection_successful')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    connection = WebSocketConnection.query.filter_by(socket_id=request.sid).first()
+    if connection:
+        db.session.delete(connection)
+        db.session.commit()
+
+@socketio.on_error_default
+def default_error_handler(e):
+    emit('error', {'message': 'Authentication error'})
+    disconnect()
+
+
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)

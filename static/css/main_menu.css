@@ -1,0 +1,137 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffd343;
+    color: #f0f0f0;
+}
+
+.container {
+    display: -webkit-box;  /* OLD - iOS 6-, Safari 3.1-6 */
+    display: -moz-box;     /* OLD - Firefox 19- (buggy but mostly works) */
+    display: -ms-flexbox;  /* TWEENER - IE 10 */
+    display: -webkit-flex; /* NEW - Chrome */
+    display: flex;         /* NEW, Spec - Opera 12.1, Firefox 20+ */
+
+    justify-content: center;
+    align-items: center;
+
+    height: 50px; /* Высота меню */
+    padding: 0 20px; /* Отступы по краям */
+    background-image: url('../images/bg/vikings_wall.jpg');
+    background-size: cover; /* Заполнить всю область */
+    background-position: center; /* Центрировать изображение */
+    background-attachment: fixed; /* Фиксированное положение */
+    color: #333; /* Цвет текста */
+    border: 1px solid #222222;
+}
+
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch; /* Чтобы контейнеры занимали всю высоту */
+    height: 99.8vh;
+}
+
+.chat {
+    flex: 1; /* Занимает все доступное пространство по вертикали */
+    padding: 20px;
+    background-color: rgba(204, 204, 204, 0.5); /* Полупрозрачный серый цвет */
+    text-align: center; /* Центрирует текст внутри блока */
+}
+
+
+
+.menu {
+    flex: 2; /* Занимает две части от трех доступных */
+    text-align: center;
+    padding: 50px;
+    background-color: rgba(52, 50, 50, 0.5); /* Полупрозрачный серый цвет */
+}
+.min_menu{
+    text-align: center;
+    background-color: #222222;
+    padding: 10px 10px;
+    border-radius: 10px;
+}
+.menu h1 {
+    color: #FFFFFF;
+    font-size: 42px;
+}
+
+.profile {
+    flex: 1; /* Занимает все доступное пространство по вертикали */
+    width: 100%; /* Занимает всю доступную ширину */
+    padding: 20px;
+}
+
+
+.userbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+    background-size: cover;
+    background-position: center;
+    backdrop-filter: blur(5px);
+}
+
+
+
+.avatar {
+    width: 60px; /* Задает ширину аватара */
+    height: 60px; /* Задает высоту аватара */
+    border-radius: 50%; /* Создает круглую форму для аватара */
+    margin-right: 10px; /* Отступ справа от аватара */
+}
+
+.nickname {
+    font-weight: bold; /* Жирный шрифт для никнейма */
+}
+.nickname a {
+    text-decoration: none;
+    color: #222222;
+    font-size: 22px;
+}
+
+
+.menu-buttons {
+    margin-top: 20px;
+}
+
+.menu-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #ffd343; 
+    color: #333; 
+    text-decoration: none;
+    border-radius: 5px;
+    margin-right: 10px;
+    transition: background-color 0.3s;
+    
+}
+
+.menu-button:hover {
+    background-color: #ffc400;
+    color: #222222;
+    transition: color 0.2s;
+}
+
+
+
+
+
+@media screen and (max-width: 768px) {
+    .menu {
+        padding: 20px;
+    }
+
+    .menu-button {
+        padding: 8px 16px;
+        margin-right: 5px;
+        margin-bottom: 10px;
+    }
+    
+}

@@ -29,6 +29,7 @@ class Board:
         # проверка на допустимость хода
         pass
 
+
 class Player(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nickname = db.Column(db.String(50), nullable=False, unique=True)
@@ -47,3 +48,12 @@ class Player(db.Model):
 
     def __repr__(self):
         return f"Player('{self.nickname}')"
+
+
+class WebSocketConnection(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
+    socket_id = db.Column(db.String(255), nullable=False)
+
+    def __repr__(self):
+        return f"WebSocketConnection(user_id={self.user_id}, socket_id={self.socket_id})"

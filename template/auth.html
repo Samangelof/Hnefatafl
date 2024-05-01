@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,6 +10,7 @@
     <title>Авторизация в игре Хнефатафл</title>
 
 </head>
+
 <body>
     <div class="container">
         <h1><i class="fa fa-lock"></i>Вход в игру Хнефатафл</h1>
@@ -20,5 +22,29 @@
             <button type="submit">Войти</button>
         </form>
     </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    <script>
+        let socket = io();
+        socket.on('connect', function () {
+            let nickname = "{{ session['nickname'] }}";
+            socket.emit('register', { nickname: nickname });
+            console.log('Connected');
+        });
+
+        socket.on('disconnect', function () {
+            console.log('Disconnected');
+        });
+
+        socket.on('connection_successful', function () {
+            console.log('Connection successful');
+        });
+
+        socket.on('error', function (data) {
+            console.log('Error:', data.message);
+        });
+    </script>
 </body>
+
 </html>
