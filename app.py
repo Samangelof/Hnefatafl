@@ -1,60 +1,37 @@
-from flask import (
-    Flask,
-    render_template,
-    jsonify,
-    render_template,
-    redirect,
-    url_for,
-    request
-)
+from flask import Flask, render_template, redirect, url_for, request, jsonify
 from flask_bcrypt import Bcrypt
-from flask_migrate import Migrate
-from models import (
-    Piece, 
-    Board,
-    Player,
-    db,
-)
-
+from models import Piece, Board, Player, db
 
 app = Flask(__name__, template_folder='template')
 bcrypt = Bcrypt(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db.init_app(app)
-migrate = Migrate(app, db)
 board = Board()
-
 
 @app.route('/', methods=['GET'])
 def show_register_form():
     return render_template('auth.html')
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['POST'])
 def register():
-    if request.method == 'POST':
-        nickname = request.form['nickname']
+    nickname = request.form.get('nickname')
 
-        # Проверяем, нет ли уже пользователя с таким никнеймом
-        existing_user = Player.query.filter_by(nickname=nickname).first()
-        if existing_user is not None:
-            return redirect(url_for('game'))
-
-        # Хэшируем пароль
-        hashed_password = bcrypt.generate_password_hash(request.form['password_hash']).decode('utf-8')
-
-        # Создаем нового пользователя
-        new_user = Player(
-            nickname=nickname,
-            password_hash=hashed_password
-        )
-
-        # Сохраняем пользователя в базе данных
-        db.session.add(new_user)
-        db.session.commit()
-
+    # Проверяем, нет ли уже пользователя с таким никнеймом
+    existing_user = Player.query.filter_by(nickname=nickname).first()
+    if existing_user:
         return redirect(url_for('game'))
-    return render_template('board.html')
 
+    # Хэшируем пароль
+    hashed_password = bcrypt.generate_password_hash(request.form.get('password_hash')).decode('utf-8')
+
+    # Создаем нового пользователя
+    new_user = Player(nickname=nickname, password_hash=hashed_password)
+
+    # Сохраняем пользователя в базе данных
+    db.session.add(new_user)
+    db.session.commit()
+
+    return redirect(url_for('game'))
 
 @app.route('/game') 
 def game():
@@ -95,8 +72,6 @@ def game():
     for piece in attackers + defenders:
         board.place_piece(piece, piece.row, piece.col)
 
-
-    # передача данных в шаблон
     context = {
         'board': board,
         'attackers': attackers,
@@ -105,7 +80,6 @@ def game():
     }
 
     return render_template('board.html', **context)
-
 
 @app.route('/move/<int:from_row>/<int:from_col>/<int:to_row>/<int:to_col>/<player_type>')
 def move_piece(from_row, from_col, to_row, to_col, player_type):
@@ -140,7 +114,6 @@ def move_piece(from_row, from_col, to_row, to_col, player_type):
     }
 
     return jsonify(response_data)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
