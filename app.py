@@ -1,8 +1,22 @@
-from flask import Flask, render_template, redirect, url_for, request, jsonify
+from flask import (
+    Flask,
+    render_template,
+    redirect,
+    url_for,
+    request,
+    jsonify,
+    session
+)
 from flask_bcrypt import Bcrypt
 from flask_socketio import SocketIO, emit, disconnect
 from flask_migrate import Migrate
-from models import Piece, Board, Player, db, WebSocketConnection
+from models import (
+    Piece,
+    Board,
+    Player,
+    db,
+    WebSocketConnection
+)
 
 
 app = Flask(__name__, template_folder='template')
@@ -14,22 +28,21 @@ board = Board()
 socketio = SocketIO(app)
 migrate = Migrate(app, db)
 
+
 @app.route('/', methods=['GET'])
 def show_register_form():
     return render_template('auth.html')
 
-@app.route('/menu', methods=['GET'])
-def menu():
-    return render_template('main_menu.html')
 
 @app.route('/register', methods=['POST'])
 def register():
     nickname = request.form.get('nickname')
-
+    session['nickname'] = nickname
+    print('[register NICKNAME]', nickname)
     # Проверяем, нет ли уже пользователя с таким никнеймом
     existing_user = Player.query.filter_by(nickname=nickname).first()
     if existing_user:
-        return redirect(url_for('game'))
+        return redirect(url_for('menu'))
 
     # Хэшируем пароль
     hashed_password = bcrypt.generate_password_hash(request.form.get('password_hash')).decode('utf-8')
@@ -41,10 +54,19 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
-    return redirect(url_for('game'))
+    return redirect(url_for('menu'))
 
-@app.route('/game') 
-def game():
+@app.route('/menu', methods=['GET'])
+def menu():
+    # nickname = request.args.get('nickname') 
+    # nickname = request.form.get('nickname')
+    nickname = session.get('nickname') 
+    print('[menu NICKNAME]', nickname)
+    return render_template('main_menu.html', nickname=nickname)
+
+@app.route('/bot_game') 
+def bot_game():
+    nickname = session.get('nickname') 
     # создаем список фигур для атаки
     attackers = [
         Piece(type='attacker', row=4, col=0),
@@ -86,10 +108,11 @@ def game():
         'board': board,
         'attackers': attackers,
         'defenders': defenders,
-        'king': king
+        'king': king,
+        'nickname': nickname
     }
 
-    return render_template('board.html', **context)
+    return render_template('board_bot.html', **context)
 
 @app.route('/move/<int:from_row>/<int:from_col>/<int:to_row>/<int:to_col>/<player_type>')
 def move_piece(from_row, from_col, to_row, to_col, player_type):
@@ -125,33 +148,31 @@ def move_piece(from_row, from_col, to_row, to_col, player_type):
 
     return jsonify(response_data)
 
-# Получить никнейм из базы данных
-def get_user_id_from_database(nickname):
-    player = Player.query.filter_by(nickname=nickname).first()
-    if player:
-        return player.id
-    return None
 
-@socketio.on('connect')
-def handle_connect():
-    user_id = get_user_id_from_database()
-    socket_id = request.sid
-    connection = WebSocketConnection(user_id=user_id, socket_id=socket_id)
-    db.session.add(connection)
-    db.session.commit()
-    emit('connection_successful')
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    connection = WebSocketConnection.query.filter_by(socket_id=request.sid).first()
-    if connection:
-        db.session.delete(connection)
-        db.session.commit()
 
-@socketio.on_error_default
-def default_error_handler(e):
-    emit('error', {'message': 'Authentication error'})
-    disconnect()
+# @socketio.on('connect')
+# def handle_connect():
+#     nickname = session.get('nickname') 
+#     socket_id = request.sid
+#     connection = WebSocketConnection(nickname=nickname, socket_id=socket_id)
+#     db.session.add(connection)
+#     db.session.commit()
+#     emit('connection_successful')
+
+
+# @socketio.on('disconnect')
+# def handle_disconnect():
+#     connection = WebSocketConnection.query.filter_by(socket_id=request.sid).first()
+#     if connection:
+#         db.session.delete(connection)
+#         db.session.commit()
+
+
+# @socketio.on_error_default
+# def default_error_handler(e):
+#     emit('error', {'message': 'Authentication error'})
+#     disconnect()
 
 
 

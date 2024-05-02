@@ -22,29 +22,6 @@
             <button type="submit">Войти</button>
         </form>
     </div>
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
-    <script>
-        let socket = io();
-        socket.on('connect', function () {
-            let nickname = "{{ session['nickname'] }}";
-            socket.emit('register', { nickname: nickname });
-            console.log('Connected');
-        });
-
-        socket.on('disconnect', function () {
-            console.log('Disconnected');
-        });
-
-        socket.on('connection_successful', function () {
-            console.log('Connection successful');
-        });
-
-        socket.on('error', function (data) {
-            console.log('Error:', data.message);
-        });
-    </script>
 </body>
 
 </html>

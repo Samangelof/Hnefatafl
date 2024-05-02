@@ -39,6 +39,8 @@ body {
     padding: 20px;
     background-color: rgba(204, 204, 204, 0.5); /* Полупрозрачный серый цвет */
     text-align: center; /* Центрирует текст внутри блока */
+    background-image: linear-gradient(to left, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+
 }
 
 
@@ -47,14 +49,18 @@ body {
     flex: 2; /* Занимает две части от трех доступных */
     text-align: center;
     padding: 50px;
-    background-color: rgba(52, 50, 50, 0.5); /* Полупрозрачный серый цвет */
+    /*background-color: rgba(52, 50, 50, 0.5); /* Полупрозрачный серый цвет */
 }
-.min_menu{
+
+.min_menu {
     text-align: center;
     background-color: #222222;
     padding: 10px 10px;
     border-radius: 10px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    height: 170px;
 }
+
 .menu h1 {
     color: #FFFFFF;
     font-size: 42px;

@@ -9,6 +9,7 @@
 
 <body>
 
+    <span style="color: #fff; font-size: 34px;">{{ nickname }}</span>
     <div class="board">
         {% for row in range(9) %}
         <div class="row">
@@ -26,9 +27,10 @@
         {% endfor %}
     </div>
 
-    <script>
-        let selectedCell = null;
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+    
+    <script>
         document.querySelectorAll('.cell').forEach(cell => {
             cell.addEventListener('click', () => {
                 if (cell.classList.contains('selected')) {
@@ -79,6 +81,7 @@
             });
         });
     </script>
+
 </body>
 
 </html>

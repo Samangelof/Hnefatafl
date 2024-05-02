@@ -11,13 +11,17 @@
 
 <body>
     <div class="container">
-        <div class="chat">Чат</div>
+        <div class="chat">
+            Общий чат (в разработке)
+        </div>
+
         <div class="menu">
             <div class="min_menu">
                 <h1>Куда пойдем ?</h1>
                 <div class="menu-buttons">
-                    <a href="/online-game" class="menu-button">Играть онлайн</a>
-                    <a href="/bot-game" class="menu-button">Играть с ботом</a>
+                    <!-- <a href="/online-game" class="menu-button">Играть онлайн</a> -->
+                    <a href="online_game" class="menu-button">Играть онлайн</a>
+                    <a href="{{ url_for('bot_game') }}" class="menu-button">Играть с ботом</a>
                 </div>
             </div>
         </div>
@@ -27,7 +31,7 @@
             <div class="userbar">
                 <img src="../static/images/profiles/Clipped_image_20231015_082940-01.jpeg" alt="avatar" class="avatar">
                 <span class="nickname">
-                    <a href="/profile">Samangelof</a>
+                    <a href="/profile">{{ nickname }}</a>
                 </span>
             </div>
         </div>
