@@ -26,8 +26,31 @@ class Board:
             self.place_piece(piece, new_row, new_col)
 
     def is_valid_move(self, piece, new_row, new_col):
-        # проверка на допустимость хода
-        pass
+        # Check if the new position is within the board
+        if new_row < 0 or new_row >= 9 or new_col < 0 or new_col >= 9:
+            return False
+        
+        # Check if the new position is on the same row or column
+        if piece.row != new_row and piece.col != new_col:
+            return False
+
+        # Check if the new position is empty or contains an opponent's piece
+        if self.grid[new_row][new_col] is not None and self.grid[new_row][new_col].type == piece.type:
+            return False
+
+        return True
+    
+    def serialize(self):
+        serialized_board = []
+        for row in self.grid:
+            serialized_row = []
+            for cell in row:
+                if cell is None:
+                    serialized_row.append(None)
+                else:
+                    serialized_row.append({'type': cell.type})
+            serialized_board.append(serialized_row)
+        return serialized_board
 
 
 class Player(db.Model):

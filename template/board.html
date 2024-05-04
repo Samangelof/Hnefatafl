@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <title>Hnefatafl Game</title>
+</head>
+
+<body>
+
+    <ul id="player-list" style="color: #fff; font-size: 34px;">
+
+    </ul>
+
+    <div class="board">
+        {% for row in range(9) %}
+        <div class="row">
+            {% for col in range(9) %}
+            {% if board.grid[row][col] %}
+            {% set piece = board.grid[row][col] %}
+            <div class="cell {{ piece.type }}" data-row="{{ row }}" data-col="{{ col }}">
+                {{ piece.type[0] }}
+            </div>
+            {% else %}
+            <div class="cell" data-row="{{ row }}" data-col="{{ col }}"></div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    <div class="chat-container" style="color: #fff;">
+        <div class="chat">
+            <input id="message" autocomplete="off">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+        <ul id="messages"></ul>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
+
+    <script>
+        // функция снимает выделение со всех клеток на доске
+        function clearSelection() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+        }
+
+        function sendMove(from_row, from_col, to_row, to_col, player_type) {
+            fetch('/move_piece', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    from_row: from_row,
+                    from_col: from_col,
+                    to_row: to_row,
+                    to_col: to_col,
+                    player_type: player_type
+                }),
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Invalid move');
+                }
+                return response.text();
+            }).catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // изначально ни одна клетка не выбрана
+        let selectedCell = null;
+
+        document.querySelectorAll('.cell').forEach(cell => {
+            cell.addEventListener('click', () => {
+                if (cell.classList.contains('selected')) {
+                    // eсли клетка уже выбрана, сбрасываем выделение
+                    cell.classList.remove('selected');
+                    selectedCell = null;
+                    return;
+                }
+
+                if (selectedCell) {
+                    const from_row = parseInt(selectedCell.getAttribute('data-row'));
+                    const from_col = parseInt(selectedCell.getAttribute('data-col'));
+                    const to_row = parseInt(cell.getAttribute('data-row'));
+                    const to_col = parseInt(cell.getAttribute('data-col'));
+                    const player_type = 'attacker';
+
+                    if (from_row !== to_row && from_col !== to_col) {
+                        console.log('Неверный ход: необходимо перемещаться по горизонтали или вертикали.');
+                        return;
+                    }
+                    fetch('/move_piece',
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                from_row: from_row,
+                                from_col: from_col,
+                                to_row: to_row,
+                                to_col: to_col,
+                                player_type: 'attacker'  // здесь нужно учитывать тип игрока
+                            }),
+                        }
+                    ).then(response => {
+                        if (!response.ok) {
+                            throw new Error('Invalid move');
+                        }
+                        return response.text();
+                    }).then(data => {
+                        console.log('[DATA]', data);
+                        // Обновление игрового состояния на фронте
+                        const piece = selectedCell.innerHTML;
+                        selectedCell.innerHTML = '';
+                        cell.innerHTML = piece;
+                        selectedCell.classList.remove('selected');
+                        cell.classList.add('selected');
+                        selectedCell = null;
+
+                        // Снять выделения со всех клеток
+                        clearSelection();
+                    })
+                        .catch(error => {
+                            console.error('Error:', error);
+                        });
+                } else {
+                    // если нет выбранной клетки, выбираем текущую, если на ней есть фигура
+                    if (cell.innerHTML.trim()) {
+                        cell.classList.add('selected');
+                        selectedCell = cell;
+                    }
+                }
+            });
+        });
+
+
+
+        let socket = io();
+
+        socket.on('connect', function () {
+            console.log('Connected to server');
+        });
+
+        socket.on('disconnect', function () {
+            console.log('Disconnected from server');
+        });
+        socket.on('user_connected', function (data) {
+            let nickname = data.nickname;
+            console.log(`${nickname} вошел в игру`);
+            let playerList = document.getElementById('player-list');
+            let playerItem = document.createElement('li');
+            playerItem.textContent = nickname;
+            playerList.appendChild(playerItem);
+        });
+        
+
+        socket.on('move_piece', function (data) {
+            console.log('[MOVE PIECE]', data);
+            movePiece(data);
+            console.log('Board updated successfully.');
+
+        });
+
+        socket.on('message', function (data) {
+            let item = document.createElement('li');
+            item.textContent = `${data.nickname}: ${data.message}`;
+            document.getElementById('messages').appendChild(item);
+        });
+
+        function movePiece(data) {
+            const fromRow = data.from_row;
+            const fromCol = data.from_col;
+            const toRow = data.to_row;
+            const toCol = data.to_col;
+
+            const fromCell = document.querySelector(`.cell[data-row="${fromRow}"][data-col="${fromCol}"]`);
+            const toCell = document.querySelector(`.cell[data-row="${toRow}"][data-col="${toCol}"]`);
+
+            // Перемещаем фигуру с начальной клетки на конечную
+            toCell.innerHTML = fromCell.innerHTML;
+            fromCell.innerHTML = '';
+        }
+
+
+        function sendMessage() {
+            let message = document.getElementById('message').value;
+            socket.emit('message', message);
+            document.getElementById('message').value = '';
+        }
+
+
+    </script>
+
+    <script>
+    </script>
+
+</body>
+
+</html>

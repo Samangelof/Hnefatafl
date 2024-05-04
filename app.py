@@ -64,8 +64,8 @@ def menu():
     print('[menu NICKNAME]', nickname)
     return render_template('main_menu.html', nickname=nickname)
 
-@app.route('/bot_game') 
-def bot_game():
+@app.route('/game') 
+def game():
     nickname = session.get('nickname') 
     # создаем список фигур для атаки
     attackers = [
@@ -112,10 +112,11 @@ def bot_game():
         'nickname': nickname
     }
 
-    return render_template('board_bot.html', **context)
+    return render_template('board.html', **context)
 
+# для бота
 @app.route('/move/<int:from_row>/<int:from_col>/<int:to_row>/<int:to_col>/<player_type>')
-def move_piece(from_row, from_col, to_row, to_col, player_type):
+def move_piece_bot(from_row, from_col, to_row, to_col, player_type):
     piece = board.grid[from_row][from_col]
     if piece is None or piece.type != player_type:
         return "Invalid move"
@@ -150,31 +151,66 @@ def move_piece(from_row, from_col, to_row, to_col, player_type):
 
 
 
-
-# @socketio.on('connect')
-# def handle_connect():
-#     nickname = session.get('nickname') 
-#     socket_id = request.sid
-#     connection = WebSocketConnection(nickname=nickname, socket_id=socket_id)
-#     db.session.add(connection)
-#     db.session.commit()
-#     emit('connection_successful')
-
-
-# @socketio.on('disconnect')
-# def handle_disconnect():
-#     connection = WebSocketConnection.query.filter_by(socket_id=request.sid).first()
-#     if connection:
-#         db.session.delete(connection)
-#         db.session.commit()
+# Онлайн
+@socketio.on('connect')
+def handle_connect():
+    nickname = session.get('nickname')
+    print(f'[req.args]{request.args}')
+    emit('user_connected', {'nickname': nickname}, broadcast=True)
+    print(f'[conn nick] {nickname}')
+    # Создаем запись о подключении в базе данных
+    connection = WebSocketConnection(user_id=nickname, socket_id=request.sid)
+    db.session.add(connection)
+    db.session.commit()
 
 
-# @socketio.on_error_default
-# def default_error_handler(e):
-#     emit('error', {'message': 'Authentication error'})
-#     disconnect()
+@app.route('/move_piece', methods=['POST'])
+def move_piece_handler():
+    data = request.json
+    print(F'[MOVE_PIECE] {data}')
+    socketio.emit('move_piece', data, broadcast=True)
+    return 'Move piece request received', 200
+
+    
+@socketio.on('move_piece')
+def handle_move_piece(data):
+    from_row = data['from_row']
+    from_col = data['from_col']
+    to_row = data['to_row']
+    to_col = data['to_col']
+    player_type = data['player_type']
+
+    if board.is_valid_move(board.grid[from_row][from_col], to_row, to_col):
+        board.move_piece(board.grid[from_row][from_col], to_row, to_col)
+        emit('update_board', {'board': board.serialize()}, broadcast=True)
+    else:
+        emit('move_error', {'message': 'Invalid move'})
 
 
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    connection = WebSocketConnection.query.filter_by(socket_id=request.sid).first()
+    if connection:
+        # удаляем запись о подключении из базы данных
+        db.session.delete(connection)
+        db.session.commit()
+        emit('user_disconnected', {'nickname': connection.nickname}, broadcast=True)
+
+@socketio.on_error_default
+def default_error_handler(e):
+    # отправляем сообщение об ошибке на клиент и отключаем соединение
+    emit('error', {'message': 'An error occurred: {}'.format(e)})
+    disconnect()
+
+
+
+# чат
+@socketio.on('message')
+def handle_message(message):
+    nickname = session.get('nickname')
+    print('Received message from ' + nickname + ': ' + message)
+    emit('message', {'nickname': nickname, 'message': message}, broadcast=True)
 
 
 if __name__ == '__main__':
