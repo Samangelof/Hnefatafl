@@ -74,6 +74,25 @@
 
         // изначально ни одна клетка не выбрана
         let selectedCell = null;
+        let player_type = confirm('Выберите сторону: attacker или defender. Нажмите "OK" для attacker, "Отмена" для defender.');
+
+        if (player_type) {
+            console.log('Вы выбрали сторону attacker');
+            player_type = 'attacker';
+        } else {
+            console.log('Вы выбрали сторону defender');
+            player_type = 'defender';
+        }
+
+
+        // const player_type = 'attacker';
+
+        // const player_type = prompt('Выберите сторону: attacker или defender');
+        // if (player_type !== 'attacker' && player_type !== 'defender') {
+        //     alert('Неверный выбор стороны. Пожалуйста, выберите attacker или defender.');
+        //     // можно добавить код для повторного запроса стороны или прерывания игры
+        // }
+
 
         document.querySelectorAll('.cell').forEach(cell => {
             cell.addEventListener('click', () => {
@@ -159,7 +178,7 @@
             playerItem.textContent = nickname;
             playerList.appendChild(playerItem);
         });
-        
+
 
         socket.on('move_piece', function (data) {
             console.log('[MOVE PIECE]', data);
@@ -181,7 +200,9 @@
             const toCol = data.to_col;
 
             const fromCell = document.querySelector(`.cell[data-row="${fromRow}"][data-col="${fromCol}"]`);
+                console.log('Откуда', fromCell);
             const toCell = document.querySelector(`.cell[data-row="${toRow}"][data-col="${toCol}"]`);
+                console.log('Куда', toCell);
 
             // Перемещаем фигуру с начальной клетки на конечную
             toCell.innerHTML = fromCell.innerHTML;

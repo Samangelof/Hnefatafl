@@ -159,7 +159,7 @@ def handle_connect():
     emit('user_connected', {'nickname': nickname}, broadcast=True)
     print(f'[conn nick] {nickname}')
     # Создаем запись о подключении в базе данных
-    connection = WebSocketConnection(user_id=nickname, socket_id=request.sid)
+    connection = WebSocketConnection(nickname=nickname, socket_id=request.sid)
     db.session.add(connection)
     db.session.commit()
 

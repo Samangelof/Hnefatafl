@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: 5b32609e6ec5
+Revision ID: 15e29fe0c07c
 Revises: 
-Create Date: 2024-05-01 05:22:56.648335
+Create Date: 2024-05-06 01:29:16.399954
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5b32609e6ec5'
+revision = '15e29fe0c07c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -32,9 +32,9 @@ def upgrade():
     )
     op.create_table('web_socket_connection',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('nickname', sa.Integer(), nullable=False),
     sa.Column('socket_id', sa.String(length=255), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['player.id'], ),
+    sa.ForeignKeyConstraint(['nickname'], ['player.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

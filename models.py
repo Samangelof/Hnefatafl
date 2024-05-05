@@ -20,10 +20,12 @@ class Board:
         piece.row = row
         piece.col = col
 
-    def move_piece(self, piece, new_row, new_col):
-        if self.is_valid_move(piece, new_row, new_col):
+    def move_piece(self, piece, new_row, new_col, player_type):
+        if self.is_valid_move(piece, new_row, new_col, player_type):
             self.grid[piece.row][piece.col] = None
             self.place_piece(piece, new_row, new_col)
+
+
 
     def is_valid_move(self, piece, new_row, new_col):
         # Check if the new position is within the board
@@ -75,7 +77,7 @@ class Player(db.Model):
 
 class WebSocketConnection(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
+    nickname = db.Column(db.Integer, db.ForeignKey('player.id'), nullable=False)
     socket_id = db.Column(db.String(255), nullable=False)
 
     def __repr__(self):
