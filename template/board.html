@@ -24,12 +24,13 @@
                 {{ piece.type[0] }}
             </div>
             {% else %}
-            <div class="cell" data-row="{{ row }}" data-col="{{ col }}"></div>
+            <div class="cell empty" data-row="{{ row }}" data-col="{{ col }}"></div>
             {% endif %}
             {% endfor %}
         </div>
         {% endfor %}
     </div>
+
     <div class="chat-container" style="color: #fff;">
         <div class="chat">
             <input id="message" autocomplete="off">
@@ -96,19 +97,32 @@
 
         document.querySelectorAll('.cell').forEach(cell => {
             cell.addEventListener('click', () => {
+                // определение типа фигуры на клетке
+                const pieceType = cell.classList.contains('attacker') ? 'attacker' : (cell.classList.contains('defender') ? 'defender' : 'empty');
+                if ((player_type === 'attacker' && pieceType === 'defender') || (player_type === 'defender' && pieceType === 'attacker')) {
+                    console.log('Игроку запрещено брать фигуры соперника');
+                    return;
+                }
+
+
                 if (cell.classList.contains('selected')) {
                     // eсли клетка уже выбрана, сбрасываем выделение
                     cell.classList.remove('selected');
                     selectedCell = null;
                     return;
                 }
-
                 if (selectedCell) {
+                    // если уже есть выбранная клетка, сбрасываем ее выделение
+                    selectedCell.classList.remove('selected');
+                }
+
+                if (selectedCell && cell.classList.contains('empty')) {
                     const from_row = parseInt(selectedCell.getAttribute('data-row'));
                     const from_col = parseInt(selectedCell.getAttribute('data-col'));
                     const to_row = parseInt(cell.getAttribute('data-row'));
                     const to_col = parseInt(cell.getAttribute('data-col'));
-                    const player_type = 'attacker';
+                    // 
+
 
                     if (from_row !== to_row && from_col !== to_col) {
                         console.log('Неверный ход: необходимо перемещаться по горизонтали или вертикали.');
@@ -125,7 +139,7 @@
                                 from_col: from_col,
                                 to_row: to_row,
                                 to_col: to_col,
-                                player_type: 'attacker'  // здесь нужно учитывать тип игрока
+                                player_type: player_type  // здесь нужно учитывать тип игрока
                             }),
                         }
                     ).then(response => {
@@ -141,6 +155,23 @@
                         cell.innerHTML = piece;
                         selectedCell.classList.remove('selected');
                         cell.classList.add('selected');
+
+                        if (pieceType === 'attacker') {
+                            // удаляются классы defender и attacker
+                            selectedCell.classList.remove('defender')
+                            selectedCell.classList.remove('attacker')
+
+                            // пометить начальную клетку как пустую
+                            selectedCell.classList.add('empty');
+                        }
+                        else {
+                            selectedCell.classList.remove('defender')
+                            selectedCell.classList.remove('attacker')
+
+                            selectedCell.classList.add('empty');
+
+                        }
+                        // selectedCell.classList.add('empty');
                         selectedCell = null;
 
                         // Снять выделения со всех клеток
@@ -182,9 +213,10 @@
 
         socket.on('move_piece', function (data) {
             console.log('[MOVE PIECE]', data);
-            movePiece(data);
-            console.log('Board updated successfully.');
-
+            setTimeout(function () {
+                movePiece(data);
+                console.log('Board updated successfully.');
+            }, 100); // Задержка в 100 миллисекунд
         });
 
         socket.on('message', function (data) {
@@ -200,13 +232,24 @@
             const toCol = data.to_col;
 
             const fromCell = document.querySelector(`.cell[data-row="${fromRow}"][data-col="${fromCol}"]`);
-                console.log('Откуда', fromCell);
+            console.log('Откуда', fromCell);
             const toCell = document.querySelector(`.cell[data-row="${toRow}"][data-col="${toCol}"]`);
-                console.log('Куда', toCell);
+            console.log('Куда', toCell);
 
-            // Перемещаем фигуру с начальной клетки на конечную
-            toCell.innerHTML = fromCell.innerHTML;
-            fromCell.innerHTML = '';
+            if (data.player_type === 'attacker') {
+                fromCell.innerHTML = ''
+                toCell.innerHTML = 'A';
+                toCell.classList.add('attacker')
+                toCell.classList.add('empty')
+                // toCell.classList.remove('attacker')
+            }
+            if (data.player_type === 'defender') {
+                fromCell.innerHTML = ''
+                toCell.innerHTML = 'D';
+                toCell.classList.add('defender')
+                toCell.classList.remove('empty')
+                // toCell.classList.remove('attacker')
+            }
         }
 
 
