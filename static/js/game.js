@@ -1,3 +1,15 @@
+// изначально ни одна клетка не выбрана
+let selectedCell = null;
+// начальный игрок который будет ходить
+let walkingPlayer = 'attacker'
+// сменить игрока
+function switchPlayer() {
+    if (walkingPlayer === 'attacker') {
+        walkingPlayer = 'defender';
+    } else {
+        walkingPlayer = 'attacker';
+    }
+}
 // функция снимает выделение со всех клеток на доске
 function clearSelection() {
     document.querySelectorAll('.cell').forEach(cell => {
@@ -28,8 +40,6 @@ function sendMove(from_row, from_col, to_row, to_col, player_type) {
     });
 }
 
-// изначально ни одна клетка не выбрана
-let selectedCell = null;
 let player_type = confirm('Выберите сторону: attacker или defender. Нажмите "OK" для attacker, "Отмена" для defender.');
 
 if (player_type) {
@@ -48,9 +58,17 @@ if (player_type) {
 //     alert('Неверный выбор стороны. Пожалуйста, выберите attacker или defender.');
 //     // можно добавить код для повторного запроса стороны или прерывания игры
 // }
+let attackerCells = document.querySelectorAll('.attacker');
+console.log('[NO DEF]', attackerCells);
 
 document.querySelectorAll('.cell').forEach(cell => {
     cell.addEventListener('click', () => {
+        // проверяем, можно ли выбирать фигуру в зависимости от текущего игрока
+        if ((walkingPlayer === 'attacker' && cell.classList.contains('defender')) ||
+            (walkingPlayer === 'defender' && cell.classList.contains('attacker'))) {
+            console.log('Сейчас ход другого игрока');
+            return;
+        }
         // определение типа фигуры на клетке
         const pieceType = cell.classList.contains('attacker') ? 'attacker' : (cell.classList.contains('defender') ? 'defender' : 'empty');
         if ((player_type === 'attacker' && pieceType === 'defender') || (player_type === 'defender' && pieceType === 'attacker')) {

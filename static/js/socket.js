@@ -24,6 +24,7 @@ socket.on('move_piece', function (data) {
     console.log('[MOVE PIECE]', data);
     setTimeout(function () {
         movePiece(data);
+        switchPlayer();
         console.log('Board updated successfully.');
     }, 100); 
 });
@@ -46,6 +47,10 @@ function movePiece(data) {
     const toCell = document.querySelector(`.cell[data-row="${toRow}"][data-col="${toCol}"]`);
     console.log('Куда', toCell);
 
+
+    let attackerCells = document.querySelectorAll('.attacker');
+    console.log('[DEF]', attackerCells);
+
     if (data.player_type === 'attacker') {
         fromCell.innerHTML = ''
         toCell.innerHTML = 'A';
@@ -60,6 +65,13 @@ function movePiece(data) {
         toCell.classList.remove('empty')
         // toCell.classList.remove('attacker')
     }
+    toCell.classList.remove('empty')
+    fromCell.classList.add('empty')
+    fromCell.classList.remove('attacker')
+    fromCell.classList.remove('defender')
+
+
+
 }
 
 function sendMessage() {
