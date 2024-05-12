@@ -25,8 +25,6 @@ class Board:
             self.grid[piece.row][piece.col] = None
             self.place_piece(piece, new_row, new_col)
 
-
-
     def is_valid_move(self, piece, new_row, new_col):
         # Check if the new position is within the board
         if new_row < 0 or new_row >= 9 or new_col < 0 or new_col >= 9:

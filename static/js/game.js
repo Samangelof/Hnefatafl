@@ -17,28 +17,6 @@ function clearSelection() {
     });
 }
 
-function sendMove(from_row, from_col, to_row, to_col, player_type) {
-    fetch('/move_piece', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            from_row: from_row,
-            from_col: from_col,
-            to_row: to_row,
-            to_col: to_col,
-            player_type: player_type
-        }),
-    }).then(response => {
-        if (!response.ok) {
-            throw new Error('Invalid move');
-        }
-        return response.text();
-    }).catch(error => {
-        console.error('Error:', error);
-    });
-}
 
 let player_type = confirm('Выберите сторону: attacker или defender. Нажмите "OK" для attacker, "Отмена" для defender.');
 
@@ -51,22 +29,13 @@ if (player_type) {
 }
 
 
-// const player_type = 'attacker';
-
-// const player_type = prompt('Выберите сторону: attacker или defender');
-// if (player_type !== 'attacker' && player_type !== 'defender') {
-//     alert('Неверный выбор стороны. Пожалуйста, выберите attacker или defender.');
-//     // можно добавить код для повторного запроса стороны или прерывания игры
-// }
-let attackerCells = document.querySelectorAll('.attacker');
-console.log('[NO DEF]', attackerCells);
-
 document.querySelectorAll('.cell').forEach(cell => {
     cell.addEventListener('click', () => {
+        
         // проверяем, можно ли выбирать фигуру в зависимости от текущего игрока
         if ((walkingPlayer === 'attacker' && cell.classList.contains('defender')) ||
             (walkingPlayer === 'defender' && cell.classList.contains('attacker'))) {
-            console.log('Сейчас ход другого игрока');
+            console.log('Нельзя выбирать фигуры соперника');
             return;
         }
         // определение типа фигуры на клетке
