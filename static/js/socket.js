@@ -37,8 +37,6 @@ socket.on('move_piece', function (data) {
 });
 
 
-
-
 function movePiece(data) {
     const fromRow = data.from_row;
     const fromCol = data.from_col;
@@ -48,18 +46,18 @@ function movePiece(data) {
     const fromCell = document.querySelector(`.cell[data-row="${fromRow}"][data-col="${fromCol}"]`);
     const toCell = document.querySelector(`.cell[data-row="${toRow}"][data-col="${toCol}"]`);
 
-    // Определяем класс фигуры
+    // определяем класс фигуры
     const playerType = data.player_type;
     const pieceClass = playerType === 'attacker' ? 'attacker' : 'defender';
 
-    // Удаляем класс фигуры из начальной ячейки
+    // удаляем класс фигуры из начальной ячейки
     fromCell.classList.remove('attacker', 'defender', 'empty');
 
-    // Добавляем класс фигуры в конечную ячейку
+    // добавляем класс фигуры в конечную ячейку
     toCell.classList.add(pieceClass);
     toCell.classList.remove('empty');
-    
-    // Обновляем содержимое ячеек для отображения фигур
+
+    // обновляем содержимое ячеек для отображения фигур
     if (playerType === 'attacker') {
         fromCell.innerHTML = '';
         toCell.innerHTML = 'A';
@@ -70,13 +68,13 @@ function movePiece(data) {
         toCell.classList.add('defender');
     }
 
-    // Добавляем класс "empty" к начальной ячейке
+    // добавляем класс "empty" к начальной ячейке
     fromCell.classList.add('empty');
 
-    // Снять выделения со всех клеток
+    // снять выделения со всех клеток
     clearSelection();
 
-    // Проверяем окружение фишек после каждого хода
+    // проверяем окружение фишек после каждого хода
     checkSurroundingPieces();
 }
 

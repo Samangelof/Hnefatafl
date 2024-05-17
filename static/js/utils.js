@@ -3,61 +3,105 @@ let cells = document.querySelectorAll('.cell');
 // эта функция проверяет окружение каждой ячейки на доске, чтобы определить, 
 // была ли фишка съедена или находится ли она между двумя вражескими фишками. 
 // если фишка была съедена, то она удаляется из ячейки и заменяется пустой ячейкой
+// function checkSurroundingPieces() {
+//     cells.forEach(function (cell) {
+//         let row = parseInt(cell.getAttribute('data-row'));
+//         let col = parseInt(cell.getAttribute('data-col'));
+//         let pieceType = cell.classList.contains('attacker') ? 'attacker' : 'defender';
+
+//         // проверяем, является ли ячейка небезопасной
+//         if (!checkClassSafe(row, col)) {
+//             // проверяем, окружена ли фишка по горизонтали или вертикали и не находится ли она между врагами
+//             if (PieceHorizontalSurrounded(row, col, pieceType) && !isBetweenEnemies(row, col)) {
+//                 console.log(`Фишка типа ${pieceType} была съедена в ячейке (${row}, ${col})`);
+//                 cell.innerHTML = '';
+//                 cell.classList.add('empty');
+//                 cell.classList.add('safe');
+//             }
+//             if (PieceVerticallySurrounded(row, col, pieceType) && !isBetweenEnemies(row, col)) {
+//                 // проверяем снова, является ли ячейка безопасной
+//                 console.log(`Фишка типа ${pieceType} была съедена в ячейке (${row}, ${col})`);
+//                 cell.innerHTML = '';
+//                 cell.classList.add('empty');
+//                 cell.classList.add('safe');
+//             }
+//         }
+//     });
+// }
+
 function checkSurroundingPieces() {
     cells.forEach(function (cell) {
         let row = parseInt(cell.getAttribute('data-row'));
         let col = parseInt(cell.getAttribute('data-col'));
         let pieceType = cell.classList.contains('attacker') ? 'attacker' : 'defender';
 
-        // проверяем, является ли ячейка небезопасной
-        if (!checkClassSafe(row, col)) {
-            // проверяем, окружена ли фишка по горизонтали или вертикали и не находится ли она между врагами
-            if (PieceHorizontalSurrounded(row, col, pieceType) && !isBetweenEnemies(row, col)) {
-                // снова проверка, является ли ячейка безопасной
-                if (checkClassSafe(row, col)) {
-                    cell.innerHTML = pieceType;
-                } else {
-                    console.log(`Фишка типа ${pieceType} была съедена в ячейке (${row}, ${col})`);
-                    cell.innerHTML = '';
-                    cell.classList.add('empty');
-                    cell.classList.add('safe');
-                    // cell.classList.remove('defender');
-                    // cell.classList.remove('attacker');
-                }
+        if (!getClassSafe(row, col)) {
+            if (PieceHorizontallySurrounded(row, col, pieceType)) {
+                cell.innerHTML = '';
+                cell.classList.remove(pieceType);
+                cell.classList.add('empty');
+            }
+            if (PieceVerticallySurrounded(row, col, pieceType)) {
+                cell.innerHTML = '';
+                cell.classList.remove(pieceType);
+                cell.classList.add('empty');
             }
         }
 
-        if (PieceVerticallySurrounded(row, col, pieceType)) {
-            // проверяем снова, является ли ячейка безопасной
-            console.log(`Фишка типа ${pieceType} была съедена в ячейке (${row}, ${col})`);
-            cell.innerHTML = '';
-            cell.classList.add('empty');
-            cell.classList.add('safe');
-            cell.classList.remove('defender');
-            cell.classList.remove('attacker');
-        }
-        if (!cell.classList.contains('attacker') && !cell.classList.contains('defender')) {
-            // если в клетке нет фишки, убираем класс safe
-            cell.classList.remove('safe');
+        // Проверяем, является ли клетка пустой
+        if (isEmptyCell(row, col)) {
+            let leftCell = getCell(row, col - 1);
+            let rightCell = getCell(row, col + 1);
+            let topCell = getCell(row - 1, col);
+            let bottomCell = getCell(row + 1, col);
+
+            // Проверяем, что пустая клетка окружена атакующими с обеих сторон
+            if ((leftCell && rightCell && leftCell.classList.contains('attacker') && rightCell.classList.contains('attacker')) ||
+                (topCell && bottomCell && topCell.classList.contains('attacker') && bottomCell.classList.contains('attacker'))) {
+                // cell.innerHTML = '1';
+                cell.classList.add('safe');
+                cell.classList.add(pieceType);
+            }
+
+            // Проверяем, что пустая клетка окружена защитниками с обеих сторон
+            if ((leftCell && rightCell && leftCell.classList.contains('defender') && rightCell.classList.contains('defender')) ||
+                (topCell && bottomCell && topCell.classList.contains('defender') && bottomCell.classList.contains('defender'))) {
+                // cell.innerHTML = '2';
+                cell.classList.add('safe');
+                cell.classList.remove(pieceType);
+            }
+
+            // Проверяем, что пустая клетка не окружена фишками с обеих сторон
+            if (!((leftCell && leftCell.classList.contains('attacker') && rightCell && rightCell.classList.contains('attacker')) ||
+                (topCell && topCell.classList.contains('attacker') && bottomCell && bottomCell.classList.contains('attacker')) ||
+                (leftCell && leftCell.classList.contains('defender') && rightCell && rightCell.classList.contains('defender')) ||
+                (topCell && topCell.classList.contains('defender') && bottomCell && bottomCell.classList.contains('defender')))) {
+                // cell.innerHTML = '0';
+                cell.classList.remove(pieceType);
+
+            }
         }
 
-        // дополнительная проверка после каждого хода
-        cells.forEach(function (cell) {
-            let row = parseInt(cell.getAttribute('data-row'));
-            let col = parseInt(cell.getAttribute('data-col'));
-            let pieceType = cell.classList.contains('attacker') ? 'attacker' : 'defender';
+        // Проверяем, если клетка с фишкой перестала быть окруженной
+        if (cell.classList.contains('attacker') || cell.classList.contains('defender')) {
+            pieceType = cell.classList.contains('attacker') ? 'attacker' : 'defender';
 
-            // если клетка ранее была безопасной, но перестала быть окруженной, убираем у нее класс safe
-            if (checkClassSafe(row, col) && !PieceHorizontalSurrounded(row, col, pieceType) && !PieceVerticallySurrounded(row, col, pieceType)) {
+            if (!PieceHorizontallySurrounded(row, col, pieceType) && !PieceVerticallySurrounded(row, col, pieceType)) {
                 cell.classList.remove('safe');
             }
-        });
+        }
     });
 }
 
 
 
-function checkClassSafe(row, col) {
+
+
+
+
+
+
+function getClassSafe(row, col) {
     let cell = getCell(row, col);
     return cell.classList.contains('safe');
 }
@@ -100,8 +144,22 @@ function isEmptyCell(row, col) {
 }
 
 
-// функция для проверки, окружена ли фишка pieceType с обеих сторон (горизонтально)
+// функция для проверки, окружена ли фишка pieceType с обеих сторон (вертикально)
 function PieceVerticallySurrounded(row, col, pieceType) {
+    let topRow = row - 1;
+    let bottomRow = row + 1;
+
+    // проверка, что соседние ячейки сверху и снизу от фишки содержат фишки противника
+    if (topRow >= 0 && bottomRow <= 8 &&
+        isOpponentPiece(topRow, col, pieceType) && isOpponentPiece(bottomRow, col, pieceType)) {
+        return true;
+    }
+
+    return false;
+}
+
+// функция для проверки, окружена ли фишка pieceType с обеих сторон (горизонтально)
+function PieceHorizontallySurrounded(row, col, pieceType) {
     let leftCol = col - 1;
     let rightCol = col + 1;
 
@@ -115,23 +173,42 @@ function PieceVerticallySurrounded(row, col, pieceType) {
 }
 
 
-// функция для проверки, окружена ли фишка pieceType сверху и снизу (вертикально)
-function PieceHorizontalSurrounded(row, col, pieceType) {
-    let topRow = row - 1;
-    let bottomRow = row + 1;
-
-    // проверка, что соседние ячейки сверху и снизу от фишки содержат фишки противника
-    if (topRow >= 0 && bottomRow <= 8 &&
-        isOpponentPiece(topRow, col, pieceType) && isOpponentPiece(bottomRow, col, pieceType)) {
-        return true;
-    }
-
-    return false;
-}
-
 
 // функция для проверки, содержит ли клетка фишку противника
 function isOpponentPiece(row, col, pieceType) {
     let cell = document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
     return cell && !cell.classList.contains('empty') && !cell.classList.contains(pieceType);
+}
+
+function isMoveValid(from_row, from_col, to_row, to_col) {
+    // проверяет, что клетка, куда ходим, пустая
+    if (!document.querySelector(`.cell[data-row="${to_row}"][data-col="${to_col}"]`).classList.contains('empty')) {
+        return false;
+    }
+
+    // проверяет, что ход осуществляется по вертикали или горизонтали
+    if (from_row !== to_row && from_col !== to_col) {
+        return false;
+    }
+
+    // проверяет, что нет других фишек на пути хода
+    if (from_row === to_row) {
+        const minCol = Math.min(from_col, to_col);
+        const maxCol = Math.max(from_col, to_col);
+        for (let col = minCol + 1; col < maxCol; col++) {
+            if (!document.querySelector(`.cell[data-row="${from_row}"][data-col="${col}"]`).classList.contains('empty')) {
+                return false;
+            }
+        }
+    } else if (from_col === to_col) {
+        const minRow = Math.min(from_row, to_row);
+        const maxRow = Math.max(from_row, to_row);
+        for (let row = minRow + 1; row < maxRow; row++) {
+            if (!document.querySelector(`.cell[data-row="${row}"][data-col="${from_col}"]`).classList.contains('empty')) {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }

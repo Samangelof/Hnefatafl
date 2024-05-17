@@ -31,20 +31,19 @@ if (player_type) {
 
 document.querySelectorAll('.cell').forEach(cell => {
     cell.addEventListener('click', () => {
+        const pieceType = cell.classList.contains('attacker') ? 'attacker' : (cell.classList.contains('defender') ? 'defender' : 'empty');
         
         // проверяем, можно ли выбирать фигуру в зависимости от текущего игрока
-        if ((walkingPlayer === 'attacker' && cell.classList.contains('defender')) ||
-            (walkingPlayer === 'defender' && cell.classList.contains('attacker'))) {
+        if ((pieceType === 'attacker' && cell.classList.contains('defender')) ||
+            (pieceType === 'defender' && cell.classList.contains('attacker'))) {
             console.log('Нельзя выбирать фигуры соперника');
             return;
         }
         // определение типа фигуры на клетке
-        const pieceType = cell.classList.contains('attacker') ? 'attacker' : (cell.classList.contains('defender') ? 'defender' : 'empty');
         if ((player_type === 'attacker' && pieceType === 'defender') || (player_type === 'defender' && pieceType === 'attacker')) {
             console.log('Игроку запрещено брать фигуры соперника');
             return;
         }
-
 
         if (cell.classList.contains('selected')) {
             // eсли клетка уже выбрана, сбрасываем выделение
@@ -62,13 +61,16 @@ document.querySelectorAll('.cell').forEach(cell => {
             const from_col = parseInt(selectedCell.getAttribute('data-col'));
             const to_row = parseInt(cell.getAttribute('data-row'));
             const to_col = parseInt(cell.getAttribute('data-col'));
-            // 
-
-
+            
+            if (!isMoveValid(from_row, from_col, to_row, to_col)) {
+                console.log('Неверный ход: проверьте правила перемещения фигур.');
+                return;
+            }
             if (from_row !== to_row && from_col !== to_col) {
                 console.log('Неверный ход: необходимо перемещаться по горизонтали или вертикали.');
                 return;
             }
+
             fetch('/move_piece',
                 {
                     method: 'POST',
@@ -97,30 +99,19 @@ document.querySelectorAll('.cell').forEach(cell => {
                 selectedCell.classList.remove('selected');
                 cell.classList.add('selected');
 
-                if (pieceType === 'attacker') {
-                    // удаляются классы defender и attacker
-                    selectedCell.classList.remove('defender')
-                    selectedCell.classList.remove('attacker')
+                // Удаляем классы defender и attacker из начальной клетки
+                selectedCell.classList.remove('defender', 'attacker');
+                // Добавляем класс empty к начальной клетке
+                selectedCell.classList.add('empty');
 
-                    // пометить начальную клетку как пустую
-                    selectedCell.classList.add('empty');
-                }
-                else {
-                    selectedCell.classList.remove('defender')
-                    selectedCell.classList.remove('attacker')
-
-                    selectedCell.classList.add('empty');
-
-                }
-                // selectedCell.classList.add('empty');
                 selectedCell = null;
 
                 // Снять выделения со всех клеток
                 clearSelection();
             })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+            .catch(error => {
+                console.error('Error:', error);
+            });
         } else {
             // если нет выбранной клетки, выбираем текущую, если на ней есть фигура
             if (cell.innerHTML.trim()) {
@@ -130,4 +121,3 @@ document.querySelectorAll('.cell').forEach(cell => {
         }
     });
 });
-
