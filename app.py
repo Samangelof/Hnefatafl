@@ -99,7 +99,7 @@ def game():
         Piece(type='defender', row=6, col=4)
     ]
     # позиция короля посередине доски
-    king = Piece(type='king', row=4, col=4)  
+    king = Piece(type='king defender', row=4, col=4)  
     board.place_piece(king, king.row, king.col)
 
     for piece in attackers + defenders:

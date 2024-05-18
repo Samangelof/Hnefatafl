@@ -49,7 +49,7 @@ function movePiece(data) {
     // определяем класс фигуры
     const playerType = data.player_type;
     const pieceClass = playerType === 'attacker' ? 'attacker' : 'defender';
-
+    const king = fromCell.classList.contains('king')
     // удаляем класс фигуры из начальной ячейки
     fromCell.classList.remove('attacker', 'defender', 'empty');
 
@@ -60,24 +60,33 @@ function movePiece(data) {
     // обновляем содержимое ячеек для отображения фигур
     if (playerType === 'attacker') {
         fromCell.innerHTML = '';
+        fromCell.classList.remove('attacker');
         toCell.innerHTML = 'A';
         toCell.classList.add('attacker');
     } else {
         fromCell.innerHTML = '';
+        fromCell.classList.remove('defender'); 
         toCell.innerHTML = 'D';
         toCell.classList.add('defender');
+    }
+
+    // если идет король, добавляем значение "K" в клетку
+    if (king) {
+        fromCell.innerHTML = '';
+        fromCell.classList.remove('king');
+        toCell.innerHTML = 'K';
+        toCell.classList.add('king');
     }
 
     // добавляем класс "empty" к начальной ячейке
     fromCell.classList.add('empty');
 
-    // снять выделения со всех клеток
+    // снимаем выделения со всех клеток
     clearSelection();
 
     // проверяем окружение фишек после каждого хода
     checkSurroundingPieces();
 }
-
 
 
 

@@ -1,33 +1,5 @@
 let cells = document.querySelectorAll('.cell');
 
-// эта функция проверяет окружение каждой ячейки на доске, чтобы определить, 
-// была ли фишка съедена или находится ли она между двумя вражескими фишками. 
-// если фишка была съедена, то она удаляется из ячейки и заменяется пустой ячейкой
-// function checkSurroundingPieces() {
-//     cells.forEach(function (cell) {
-//         let row = parseInt(cell.getAttribute('data-row'));
-//         let col = parseInt(cell.getAttribute('data-col'));
-//         let pieceType = cell.classList.contains('attacker') ? 'attacker' : 'defender';
-
-//         // проверяем, является ли ячейка небезопасной
-//         if (!checkClassSafe(row, col)) {
-//             // проверяем, окружена ли фишка по горизонтали или вертикали и не находится ли она между врагами
-//             if (PieceHorizontalSurrounded(row, col, pieceType) && !isBetweenEnemies(row, col)) {
-//                 console.log(`Фишка типа ${pieceType} была съедена в ячейке (${row}, ${col})`);
-//                 cell.innerHTML = '';
-//                 cell.classList.add('empty');
-//                 cell.classList.add('safe');
-//             }
-//             if (PieceVerticallySurrounded(row, col, pieceType) && !isBetweenEnemies(row, col)) {
-//                 // проверяем снова, является ли ячейка безопасной
-//                 console.log(`Фишка типа ${pieceType} была съедена в ячейке (${row}, ${col})`);
-//                 cell.innerHTML = '';
-//                 cell.classList.add('empty');
-//                 cell.classList.add('safe');
-//             }
-//         }
-//     });
-// }
 
 function checkSurroundingPieces() {
     cells.forEach(function (cell) {
@@ -39,12 +11,23 @@ function checkSurroundingPieces() {
             if (PieceHorizontallySurrounded(row, col, pieceType)) {
                 cell.innerHTML = '';
                 cell.classList.remove(pieceType);
+                cell.classList.remove('king');
                 cell.classList.add('empty');
+
             }
             if (PieceVerticallySurrounded(row, col, pieceType)) {
                 cell.innerHTML = '';
                 cell.classList.remove(pieceType);
+                cell.classList.remove('king');
                 cell.classList.add('empty');
+
+            }
+        }
+        // Проверяем, если клетка с фишкой перестала быть окруженной
+        if (!PieceHorizontallySurrounded(row, col, pieceType) && !PieceVerticallySurrounded(row, col, pieceType)) {
+            // Если клетка была окружена, убираем классы "attacker" или "defender"
+            if (cell.classList.contains('safe')) {
+                cell.classList.remove('attacker', 'defender');
             }
         }
 
@@ -60,8 +43,8 @@ function checkSurroundingPieces() {
                 (topCell && bottomCell && topCell.classList.contains('attacker') && bottomCell.classList.contains('attacker'))) {
                 // cell.innerHTML = '1';
                 cell.classList.add('safe');
-                cell.classList.add(pieceType);
             }
+
 
             // Проверяем, что пустая клетка окружена защитниками с обеих сторон
             if ((leftCell && rightCell && leftCell.classList.contains('defender') && rightCell.classList.contains('defender')) ||
@@ -78,7 +61,6 @@ function checkSurroundingPieces() {
                 (topCell && topCell.classList.contains('defender') && bottomCell && bottomCell.classList.contains('defender')))) {
                 // cell.innerHTML = '0';
                 cell.classList.remove(pieceType);
-
             }
         }
 
@@ -90,8 +72,26 @@ function checkSurroundingPieces() {
                 cell.classList.remove('safe');
             }
         }
+
+        // Если клетка, куда перемещается король, установим значение "K"
+        if (cell.classList.contains('king')) {
+            pieceType = 'defender';
+            if (!PieceHorizontallySurrounded(row, col, pieceType) && !PieceVerticallySurrounded(row, col, pieceType)) {
+                cell.innerHTML = 'K';
+                cell.classList.add('defender')
+            } else if (!PieceHorizontallySurrounded(row, col, 'attacker') && !PieceVerticallySurrounded(row, col, 'attacker')) {
+                // Обновляем значение клетки если король окружен атакующими фишками
+                cell.innerHTML = '';
+                cell.classList.remove('king');
+                cell.classList.remove('defender');
+                cell.classList.remove('safe');
+                cell.classList.add('empty');
+            }
+        }
+
     });
 }
+
 
 
 
