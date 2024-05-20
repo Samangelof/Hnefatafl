@@ -1,7 +1,9 @@
 // изначально ни одна клетка не выбрана
 let selectedCell = null;
+
 // начальный игрок который будет ходить
 let walkingPlayer = 'attacker'
+
 // сменить игрока
 function switchPlayer() {
     if (walkingPlayer === 'attacker') {
@@ -17,34 +19,35 @@ function clearSelection() {
     });
 }
 
+//? ****
+// Проверяем, был ли уже сделан выбор стороны игрока в прошлом
+let player_type = localStorage.getItem('player_type');
 
-let player_type = confirm('Выберите сторону: attacker или defender. Нажмите "OK" для attacker, "Отмена" для defender.');
-
-if (player_type) {
-    console.log('Вы выбрали сторону attacker');
-    player_type = 'attacker';
-} else {
-    console.log('Вы выбрали сторону defender');
-    player_type = 'defender';
+// Если выбор еще не был сделан, запрашиваем у пользователя и сохраняем в локальное хранилище
+if (!player_type) {
+    player_type = confirm('Выберите сторону: attacker или defender. Нажмите "OK" для attacker, "Отмена" для defender.') ? 'attacker' : 'defender';
+    localStorage.setItem('player_type', player_type);
 }
+
+// Выводим выбранную сторону в консоль
+console.log(`Вы выбрали сторону ${player_type}`);
+//? ****
 
 
 document.querySelectorAll('.cell').forEach(cell => {
     cell.addEventListener('click', () => {
-        const pieceType = cell.classList.contains('attacker') ? 'attacker' : (cell.classList.contains('defender') ? 'defender' : 'empty');
-        
         // проверяем, можно ли выбирать фигуру в зависимости от текущего игрока
-        if ((pieceType === 'attacker' && cell.classList.contains('defender')) ||
-            (pieceType === 'defender' && cell.classList.contains('attacker'))) {
-            console.log('Нельзя выбирать фигуры соперника');
+        if ((walkingPlayer === 'attacker' && cell.classList.contains('defender')) ||
+            (walkingPlayer === 'defender' && cell.classList.contains('attacker'))) {
+            console.log('Сейчас ход другого игрока');
             return;
         }
+        const pieceType = cell.classList.contains('attacker') ? 'attacker' : (cell.classList.contains('defender') ? 'defender' : 'empty');
         // определение типа фигуры на клетке
         if ((player_type === 'attacker' && pieceType === 'defender') || (player_type === 'defender' && pieceType === 'attacker')) {
             console.log('Игроку запрещено брать фигуры соперника');
             return;
         }
-
         if (cell.classList.contains('selected')) {
             // eсли клетка уже выбрана, сбрасываем выделение
             cell.classList.remove('selected');
@@ -55,15 +58,23 @@ document.querySelectorAll('.cell').forEach(cell => {
             // если уже есть выбранная клетка, сбрасываем ее выделение
             selectedCell.classList.remove('selected');
         }
-
+        // После выполнения хода проверяем, не завершена ли игра
+        if (isGameOver()) {
+            alert('Игра окончена. Король пал. Конец игры!');
+            // Или перенаправьте пользователя на другую страницу
+        }
         if (selectedCell && cell.classList.contains('empty')) {
             const from_row = parseInt(selectedCell.getAttribute('data-row'));
             const from_col = parseInt(selectedCell.getAttribute('data-col'));
             const to_row = parseInt(cell.getAttribute('data-row'));
             const to_col = parseInt(cell.getAttribute('data-col'));
-            
+            // Если выбранная фишка не является королем и целевая клетка - (4, 4), запретить ход
+            if (!cell.classList.contains('king') && to_row === 4 && to_col === 4) {
+                console.log('Неверный ход: только король может восседать на троне');
+                return;
+            }
             if (!isMoveValid(from_row, from_col, to_row, to_col)) {
-                console.log('Неверный ход: проверьте правила перемещения фигур.');
+                console.log('Неверный ход: Фишки не могут «прыгать» через другие');
                 return;
             }
             if (from_row !== to_row && from_col !== to_col) {
@@ -109,9 +120,9 @@ document.querySelectorAll('.cell').forEach(cell => {
                 // Снять выделения со всех клеток
                 clearSelection();
             })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         } else {
             // если нет выбранной клетки, выбираем текущую, если на ней есть фигура
             if (cell.innerHTML.trim()) {

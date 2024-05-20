@@ -30,7 +30,7 @@ function checkSurroundingPieces() {
                 cell.classList.remove('attacker', 'defender');
             }
         }
-
+        
         // Проверяем, является ли клетка пустой
         if (isEmptyCell(row, col)) {
             let leftCell = getCell(row, col - 1);
@@ -41,7 +41,7 @@ function checkSurroundingPieces() {
             // Проверяем, что пустая клетка окружена атакующими с обеих сторон
             if ((leftCell && rightCell && leftCell.classList.contains('attacker') && rightCell.classList.contains('attacker')) ||
                 (topCell && bottomCell && topCell.classList.contains('attacker') && bottomCell.classList.contains('attacker'))) {
-                // cell.innerHTML = '1';
+                cell.innerHTML = '1';
                 cell.classList.add('safe');
             }
 
@@ -49,7 +49,7 @@ function checkSurroundingPieces() {
             // Проверяем, что пустая клетка окружена защитниками с обеих сторон
             if ((leftCell && rightCell && leftCell.classList.contains('defender') && rightCell.classList.contains('defender')) ||
                 (topCell && bottomCell && topCell.classList.contains('defender') && bottomCell.classList.contains('defender'))) {
-                // cell.innerHTML = '2';
+                cell.innerHTML = '2';
                 cell.classList.add('safe');
                 cell.classList.remove(pieceType);
             }
@@ -59,7 +59,7 @@ function checkSurroundingPieces() {
                 (topCell && topCell.classList.contains('attacker') && bottomCell && bottomCell.classList.contains('attacker')) ||
                 (leftCell && leftCell.classList.contains('defender') && rightCell && rightCell.classList.contains('defender')) ||
                 (topCell && topCell.classList.contains('defender') && bottomCell && bottomCell.classList.contains('defender')))) {
-                // cell.innerHTML = '0';
+                cell.innerHTML = '-';
                 cell.classList.remove(pieceType);
             }
         }
@@ -76,6 +76,7 @@ function checkSurroundingPieces() {
         // Если клетка, куда перемещается король, установим значение "K"
         if (cell.classList.contains('king')) {
             pieceType = 'defender';
+            cell.classList.remove('safe');
             if (!PieceHorizontallySurrounded(row, col, pieceType) && !PieceVerticallySurrounded(row, col, pieceType)) {
                 cell.innerHTML = 'K';
                 cell.classList.add('defender')
@@ -93,6 +94,12 @@ function checkSurroundingPieces() {
 }
 
 
+// Функция для оптимизации
+function clearCell(cell) {
+    cell.innerHTML = '';
+    cell.classList.remove('attacker', 'defender', 'king', 'safe');
+    cell.classList.add('empty');
+}
 
 
 
@@ -179,6 +186,28 @@ function isOpponentPiece(row, col, pieceType) {
     let cell = document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
     return cell && !cell.classList.contains('empty') && !cell.classList.contains(pieceType);
 }
+
+// функция для проверки, содержит ли клетка фишку короля
+function isKingPiece(row, col) {
+    let cell = document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
+    return cell && cell.classList.contains('king');
+}
+
+// функция для проверки, окончена ли игра
+function isGameOver() {
+    // проверяем, есть ли король на доске
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            if (isKingPiece(row, col)) {
+                // если найден король, игра не окончена
+                return false;
+            }
+        }
+    }
+    // если короля на доске нет, игра окончена
+    return true;
+}
+
 
 function isMoveValid(from_row, from_col, to_row, to_col) {
     // проверяет, что клетка, куда ходим, пустая

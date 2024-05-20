@@ -43,6 +43,19 @@ function movePiece(data) {
     const toRow = data.to_row;
     const toCol = data.to_col;
 
+//** local storage
+    // сохраняем данные о ходе в виде объекта
+    const moveData = {
+        from_row: fromRow,
+        from_col: fromCol,
+        to_row: toRow,
+        to_col: toCol,
+        player_type: data.player_type
+    };
+
+    addMoveToLocalStorage(moveData);
+//**
+
     const fromCell = document.querySelector(`.cell[data-row="${fromRow}"][data-col="${fromCol}"]`);
     const toCell = document.querySelector(`.cell[data-row="${toRow}"][data-col="${toCol}"]`);
 
