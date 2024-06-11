@@ -1,3 +1,9 @@
+let img = document.createElement('img');
+img.src = 'static/images/p1.png';
+img.classList.add('size-image');
+// пример добавления картинки
+// toCell.appendChild(img);
+
 let socket = io();
 
 socket.on('connect', function () {
@@ -54,6 +60,7 @@ function movePiece(data) {
     };
 
     addMoveToLocalStorage(moveData);
+    
 //**
 
     const fromCell = document.querySelector(`.cell[data-row="${fromRow}"][data-col="${fromCol}"]`);
@@ -69,7 +76,13 @@ function movePiece(data) {
     // добавляем класс фигуры в конечную ячейку
     toCell.classList.add(pieceClass);
     toCell.classList.remove('empty');
-
+    // проверяем, достиг ли король края доски
+    if (king && (toRow === 0 || toRow === 8 || toCol === 0 || toCol === 8)) {
+        alert('Король в безопасности! Защитники победили');
+    }
+    // проверяем, окружен ли король
+    isKingSurrounded()
+    
     // обновляем содержимое ячеек для отображения фигур
     if (playerType === 'attacker') {
         fromCell.innerHTML = '';

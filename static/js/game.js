@@ -59,10 +59,6 @@ document.querySelectorAll('.cell').forEach(cell => {
             selectedCell.classList.remove('selected');
         }
         // После выполнения хода проверяем, не завершена ли игра
-        if (isGameOver()) {
-            alert('Игра окончена. Король пал. Конец игры!');
-            // Или перенаправьте пользователя на другую страницу
-        }
         if (selectedCell && cell.classList.contains('empty')) {
             const from_row = parseInt(selectedCell.getAttribute('data-row'));
             const from_col = parseInt(selectedCell.getAttribute('data-col'));

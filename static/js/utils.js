@@ -43,6 +43,9 @@ function checkSurroundingPieces() {
                 (topCell && bottomCell && topCell.classList.contains('attacker') && bottomCell.classList.contains('attacker'))) {
                 cell.innerHTML = '1';
                 cell.classList.add('safe');
+                cell.classList.remove(pieceType);
+            }else{
+                cell.classList.remove('safe');
             }
 
 
@@ -59,8 +62,9 @@ function checkSurroundingPieces() {
                 (topCell && topCell.classList.contains('attacker') && bottomCell && bottomCell.classList.contains('attacker')) ||
                 (leftCell && leftCell.classList.contains('defender') && rightCell && rightCell.classList.contains('defender')) ||
                 (topCell && topCell.classList.contains('defender') && bottomCell && bottomCell.classList.contains('defender')))) {
-                cell.innerHTML = '-';
+                cell.innerHTML = '';
                 cell.classList.remove(pieceType);
+                cell.classList.remove('safe');
             }
         }
 
@@ -94,20 +98,6 @@ function checkSurroundingPieces() {
 }
 
 
-// Функция для оптимизации
-function clearCell(cell) {
-    cell.innerHTML = '';
-    cell.classList.remove('attacker', 'defender', 'king', 'safe');
-    cell.classList.add('empty');
-}
-
-
-
-
-
-
-
-
 function getClassSafe(row, col) {
     let cell = getCell(row, col);
     return cell.classList.contains('safe');
@@ -119,30 +109,6 @@ function getCell(row, col) {
 }
 
 
-// функция проверяет, находится ли клетка между двумя вражескими фигурами
-function isBetweenEnemies(row, col) {
-    let leftCell = getCell(row, col - 1);
-    let rightCell = getCell(row, col + 1);
-
-    if (leftCell && rightCell) {
-        let isLeftEnemy = leftCell.classList.contains("attacker") || leftCell.classList.contains("defender");
-        let isRightEnemy = rightCell.classList.contains("attacker") || rightCell.classList.contains("defender");
-
-        if (isLeftEnemy && isRightEnemy) {
-            console.log('[True] Клетка между двумя вражескими фигурами');
-            return true;
-        }
-    }
-
-    console.log('[False] Клетка не находится между двумя вражескими фигурами');
-    return false;
-}
-
-
-function isEnemyPiece(row, col) {
-    let cell = getCell(row, col);
-    return cell && !cell.classList.contains('empty') && (cell.classList.contains("attacker") || cell.classList.contains("defender"));
-}
 
 
 function isEmptyCell(row, col) {
@@ -187,25 +153,25 @@ function isOpponentPiece(row, col, pieceType) {
     return cell && !cell.classList.contains('empty') && !cell.classList.contains(pieceType);
 }
 
-// функция для проверки, содержит ли клетка фишку короля
-function isKingPiece(row, col) {
-    let cell = document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
-    return cell && cell.classList.contains('king');
-}
-
-// функция для проверки, окончена ли игра
-function isGameOver() {
-    // проверяем, есть ли король на доске
-    for (let row = 0; row < 9; row++) {
-        for (let col = 0; col < 9; col++) {
-            if (isKingPiece(row, col)) {
-                // если найден король, игра не окончена
-                return false;
-            }
-        }
+function isKingSurrounded() {
+    // найти позицию короля
+    let kingCell = document.querySelector('.cell.king');
+    if (!kingCell) {
+        alert('Игра окончена. Король пал. Конец игры!');
+        console.error('Король не найден на доске.');
+        // перенаправить пользователя на другую страницу
+        return false;
     }
-    // если короля на доске нет, игра окончена
-    return true;
+        // перенаправить пользователя на другую страницу
+    let kingRow = parseInt(kingCell.getAttribute('data-row'));
+    let kingCol = parseInt(kingCell.getAttribute('data-col'));
+
+    // проверить, окружен ли король фигурами
+    if (PieceHorizontallySurrounded(kingRow, kingCol, 'defender') && PieceVerticallySurrounded(kingRow, kingCol, 'defender')) {
+        return true;
+    }
+
+    return false;
 }
 
 
