@@ -14,9 +14,7 @@ body {
     /* 9 строк по 50px */
     gap: 1.2px;
     width: 460px;
-    /* Общая ширина доски */
     height: 462px;
-    /* Общая высота доски */
     margin: 20px auto;
     border: 2px solid #333;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -37,12 +35,10 @@ body {
 /* фигуры */
 .attacker {
     color: red;
-    /* цвет  атакующей стороны */
 }
 
 .defender {
     color: #000;
-    /* цвет защитной стороны */
 }
 
 
@@ -67,4 +63,87 @@ body {
 .size-image {
     max-width: 50px;
     max-height: 50px;
+}
+
+.king{
+    border: 1px solid gold;
+}
+
+.chat_center{
+    width: 800px;
+    max-width: 80%;
+    margin: 0px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.chat-container {
+    background-color: #34495e;
+    padding: 20px;
+    border-radius: 5px;
+    width: 600px;
+    max-width: 80%;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chat {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.chat input {
+    flex-grow: 1;
+    padding: 10px;
+    border-radius: 3px;
+    border: 1px solid #7f8c8d;
+    margin-right: 10px;
+}
+
+.chat button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    background-color: #1abc9c;
+    color: white;
+    cursor: pointer;
+}
+
+.chat button:hover {
+    background-color: #16a085;
+}
+
+.message-list {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.message-list li {
+    background-color: #ecf0f1;
+    color: #2c3e50;
+    padding: 10px;
+    border-radius: 3px;
+    margin-bottom: 5px;
+}
+
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.fade-out {
+    animation: fadeOut 0.5s forwards;
 }

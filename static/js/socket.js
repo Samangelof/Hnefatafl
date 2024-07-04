@@ -1,6 +1,6 @@
-let img = document.createElement('img');
-img.src = 'static/images/p1.png';
-img.classList.add('size-image');
+// let img = document.createElement('img');
+// img.src = 'static/images/p1.png';
+// img.classList.add('size-image');
 // пример добавления картинки
 // toCell.appendChild(img);
 
@@ -18,10 +18,16 @@ socket.on('user_connected', function (data) {
     let nickname = data.nickname;
     console.log(`${nickname} вошел в игру`);
     let playerList = document.getElementById('player-list');
-    let playerItem = document.createElement('li');
-    playerItem.textContent = nickname;
-    playerList.appendChild(playerItem);
+
+    // проверка чтобы никнейм не дублировался
+    let existingItem = Array.from(playerList.children).find(item => item.textContent === nickname);
+    if (!existingItem) {
+        let playerItem = document.createElement('li');
+        playerItem.textContent = nickname;
+        playerList.appendChild(playerItem);
+    }
 });
+
 
 socket.on('message', function (data) {
     let item = document.createElement('li');
@@ -66,42 +72,60 @@ function movePiece(data) {
     const fromCell = document.querySelector(`.cell[data-row="${fromRow}"][data-col="${fromCol}"]`);
     const toCell = document.querySelector(`.cell[data-row="${toRow}"][data-col="${toCol}"]`);
 
-    // определяем класс фигуры
+    // определяем класс фигуры и изображение
     const playerType = data.player_type;
-    const pieceClass = playerType === 'attacker' ? 'attacker' : 'defender';
-    const king = fromCell.classList.contains('king')
+    let pieceClass, imgSrc;
+    if (playerType === 'attacker') {
+        pieceClass = 'attacker';
+        imgSrc = 'static/images/p1.png';
+    } else if (playerType === 'defender') {
+        pieceClass = 'defender';
+        imgSrc = 'static/images/p2.png';
+    }
+
+    // определяем, является ли фигура королем
+    const king = fromCell.classList.contains('king');
+    if (king) {
+        pieceClass = 'king';
+        imgSrc = 'static/images/king.png';
+    }
     // удаляем класс фигуры из начальной ячейки
-    fromCell.classList.remove('attacker', 'defender', 'empty');
+    fromCell.innerHTML = '';
+    fromCell.classList.remove('attacker', 'defender', 'king', 'empty');
 
     // добавляем класс фигуры в конечную ячейку
     toCell.classList.add(pieceClass);
     toCell.classList.remove('empty');
-    // проверяем, достиг ли король края доски
-    if (king && (toRow === 0 || toRow === 8 || toCol === 0 || toCol === 8)) {
-        alert('Король в безопасности! Защитники победили');
-    }
-    // проверяем, окружен ли король
-    isKingSurrounded()
     
     // обновляем содержимое ячеек для отображения фигур
     if (playerType === 'attacker') {
         fromCell.innerHTML = '';
         fromCell.classList.remove('attacker');
-        toCell.innerHTML = 'A';
+        toCell.innerHTML = '';
         toCell.classList.add('attacker');
+
+        let img = document.createElement('img');
+        img.src = 'static/images/p1.png';
+        img.classList.add('size-image');
+        toCell.appendChild(img);
     } else {
         fromCell.innerHTML = '';
         fromCell.classList.remove('defender'); 
-        toCell.innerHTML = 'D';
+        toCell.innerHTML = '';
         toCell.classList.add('defender');
+
+        let img = document.createElement('img');
+        img.src = 'static/images/p2.png';
+        img.classList.add('size-image');
+        toCell.appendChild(img);
     }
 
-    // если идет король, добавляем значение "K" в клетку
-    if (king) {
-        fromCell.innerHTML = '';
-        fromCell.classList.remove('king');
-        toCell.innerHTML = 'K';
-        toCell.classList.add('king');
+    // проверяем, достиг ли король края доски
+    if (king && (toRow === 0 || toRow === 8 || toCol === 0 || toCol === 8)) {
+        alert('Король в безопасности! Защитники победили');
+        localStorage.clear();
+        window.location.href = 'menu';
+
     }
 
     // добавляем класс "empty" к начальной ячейке
@@ -112,9 +136,19 @@ function movePiece(data) {
 
     // проверяем окружение фишек после каждого хода
     checkSurroundingPieces();
+
+    // проверяем, окружен ли король
+    isKingSurrounded();
 }
 
-
+function updateStepPlayerDisplay() {
+    const turnElement = document.getElementById('current-turn');
+    if (walkingPlayer === 'attacker') {
+        turnElement.textContent = 'Ход атакующих';
+    } else {
+        turnElement.textContent = 'Ход защитников';
+    }
+}
 
 function sendMessage() {
     let message = document.getElementById('message').value;

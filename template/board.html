@@ -10,9 +10,10 @@
 
 <body>
 
-    <ul id="player-list" style="color: #fff; font-size: 34px;">
-
-    </ul>
+    <ul id="player-list" style="color: #fff; font-size: 34px; list-style-type: none"></ul>
+    <div id="current-turn" style="color: #fff; font-size: 24px; margin-bottom: 10px;">
+        Ход атакующих
+    </div>
 
     <div class="board">
         {% for row in range(9) %}
@@ -21,7 +22,11 @@
             {% if board.grid[row][col] %}
             {% set piece = board.grid[row][col] %}
             <div class="cell {{ piece.type }}" data-row="{{ row }}" data-col="{{ col }}">
-                {{ piece.type[0] }}
+                <img src="{% if piece.type == 'attacker' %}
+                static/images/p1.png{% elif piece.type == 'defender' %}
+                static/images/p2.png{% elif piece.type == 'king defender' %}
+                static/images/king.png
+                {% endif %}" class="size-image">
             </div>
             {% else %}
             <div class="cell empty" data-row="{{ row }}" data-col="{{ col }}"></div>
@@ -31,12 +36,14 @@
         {% endfor %}
     </div>
 
-    <div class="chat-container" style="color: #fff;">
-        <div class="chat">
-            <input id="message" autocomplete="off">
-            <button onclick="sendMessage()">Send</button>
+    <div class="chat_center">
+        <div class="chat-container">
+            <div class="chat">
+                <input id="message" autocomplete="off" placeholder="Type your message...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+            <ul id="messages" class="message-list"></ul>
         </div>
-        <ul id="messages"></ul>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.js"></script>
@@ -45,7 +52,5 @@
     <script src="{{ url_for('static', filename='js/socket.js') }}"></script>
     <script src="{{ url_for('static', filename='js/storage.js') }}"></script>
 
-
 </body>
-
 </html>

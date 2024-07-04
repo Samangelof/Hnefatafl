@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/profile.css') }}">
+</head>
+
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <img src="{{ url_for('static', filename='images/profiles/' + player.profile_picture) }}" alt="Profile Picture" class="profile-picture">
+            <h1>{{ player.nickname }}</h1>
+        </div>
+        <div class="profile-details">
+            <p><strong>Achievements:</strong> {{ player.achievements }}</p>
+            <p><strong>K/D Ratio:</strong> {{ player.kd_ratio }}</p>
+            <p><strong>Status:</strong> {{ player.status }}</p>
+            <p><strong>Favorite Mode:</strong> {{ player.favorite_mode }}</p>
+        </div>
+    </div>
+</body>
+
+</html>

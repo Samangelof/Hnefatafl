@@ -6,11 +6,8 @@ let walkingPlayer = 'attacker'
 
 // сменить игрока
 function switchPlayer() {
-    if (walkingPlayer === 'attacker') {
-        walkingPlayer = 'defender';
-    } else {
-        walkingPlayer = 'attacker';
-    }
+    walkingPlayer = (walkingPlayer === 'attacker') ? 'defender' : 'attacker';
+    updateStepPlayerDisplay();
 }
 // функция снимает выделение со всех клеток на доске
 function clearSelection() {
@@ -25,27 +22,33 @@ let player_type = localStorage.getItem('player_type');
 
 // Если выбор еще не был сделан, запрашиваем у пользователя и сохраняем в локальное хранилище
 if (!player_type) {
-    player_type = confirm('Выберите сторону: attacker или defender. Нажмите "OK" для attacker, "Отмена" для defender.') ? 'attacker' : 'defender';
+    player_type = confirm('Нажмите "OK" для Атакующей стороны, "Отмена" для защищающей стороны.') ? 'attacker' : 'defender';
     localStorage.setItem('player_type', player_type);
 }
 
 // Выводим выбранную сторону в консоль
-console.log(`Вы выбрали сторону ${player_type}`);
+alert(`Вы выбрали сторону ${player_type}`);
 //? ****
 
 
 document.querySelectorAll('.cell').forEach(cell => {
     cell.addEventListener('click', () => {
-        // проверяем, можно ли выбирать фигуру в зависимости от текущего игрока
-        if ((walkingPlayer === 'attacker' && cell.classList.contains('defender')) ||
-            (walkingPlayer === 'defender' && cell.classList.contains('attacker'))) {
-            console.log('Сейчас ход другого игрока');
-            return;
+        //проверяем, можно ли выбирать фигуру в зависимости от текущего игрока
+        if (walkingPlayer === 'attacker') {
+            if (cell.classList.contains('defender')) {
+                alert('Сейчас ход атакующих');
+                return;
+            }
+        } else if (walkingPlayer === 'defender') {
+            if (cell.classList.contains('attacker')) {
+                alert('Сейчас ход защитников');
+                return;
+            }
         }
         const pieceType = cell.classList.contains('attacker') ? 'attacker' : (cell.classList.contains('defender') ? 'defender' : 'empty');
         // определение типа фигуры на клетке
         if ((player_type === 'attacker' && pieceType === 'defender') || (player_type === 'defender' && pieceType === 'attacker')) {
-            console.log('Игроку запрещено брать фигуры соперника');
+            alert('Игроку запрещено брать фигуры соперника');
             return;
         }
         if (cell.classList.contains('selected')) {
@@ -66,17 +69,18 @@ document.querySelectorAll('.cell').forEach(cell => {
             const to_col = parseInt(cell.getAttribute('data-col'));
             // Если выбранная фишка не является королем и целевая клетка - (4, 4), запретить ход
             if (!cell.classList.contains('king') && to_row === 4 && to_col === 4) {
-                console.log('Неверный ход: только король может восседать на троне');
-                return;
-            }
-            if (!isMoveValid(from_row, from_col, to_row, to_col)) {
-                console.log('Неверный ход: Фишки не могут «прыгать» через другие');
+                alert('Неверный ход: больше никому нельзя занимать трон');
                 return;
             }
             if (from_row !== to_row && from_col !== to_col) {
-                console.log('Неверный ход: необходимо перемещаться по горизонтали или вертикали.');
+                alert('Неверный ход: необходимо перемещаться по горизонтали или вертикали.');
                 return;
             }
+            if (!isMoveValid(from_row, from_col, to_row, to_col)) {
+                alert('Неверный ход: Фишки не могут «прыгать» через другие');
+                return;
+            }
+            
 
             fetch('/move_piece',
                 {
@@ -89,7 +93,7 @@ document.querySelectorAll('.cell').forEach(cell => {
                         from_col: from_col,
                         to_row: to_row,
                         to_col: to_col,
-                        player_type: player_type  // здесь нужно учитывать тип игрока
+                        player_type: player_type
                     }),
                 }
             ).then(response => {

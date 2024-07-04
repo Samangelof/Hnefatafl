@@ -9,25 +9,17 @@ function checkSurroundingPieces() {
 
         if (!getClassSafe(row, col)) {
             if (PieceHorizontallySurrounded(row, col, pieceType)) {
-                cell.innerHTML = '';
-                cell.classList.remove(pieceType);
-                cell.classList.remove('king');
-                cell.classList.add('empty');
-
+                fadeOutPiece(cell, pieceType);
             }
             if (PieceVerticallySurrounded(row, col, pieceType)) {
-                cell.innerHTML = '';
-                cell.classList.remove(pieceType);
-                cell.classList.remove('king');
-                cell.classList.add('empty');
-
+                fadeOutPiece(cell, pieceType);
             }
         }
-        // Проверяем, если клетка с фишкой перестала быть окруженной
-        if (!PieceHorizontallySurrounded(row, col, pieceType) && !PieceVerticallySurrounded(row, col, pieceType)) {
-            // Если клетка была окружена, убираем классы "attacker" или "defender"
-            if (cell.classList.contains('safe')) {
-                cell.classList.remove('attacker', 'defender');
+        
+        // Проверка, если клетка с фишкой перестала быть окруженной и убрать класс safe
+        if (cell.classList.contains('safe')) {
+            if (!PieceHorizontallySurrounded(row, col, pieceType) && !PieceVerticallySurrounded(row, col, pieceType)) {
+                cell.classList.remove('safe');
             }
         }
         
@@ -41,18 +33,16 @@ function checkSurroundingPieces() {
             // Проверяем, что пустая клетка окружена атакующими с обеих сторон
             if ((leftCell && rightCell && leftCell.classList.contains('attacker') && rightCell.classList.contains('attacker')) ||
                 (topCell && bottomCell && topCell.classList.contains('attacker') && bottomCell.classList.contains('attacker'))) {
-                cell.innerHTML = '1';
+                cell.innerHTML = '';
                 cell.classList.add('safe');
                 cell.classList.remove(pieceType);
-            }else{
-                cell.classList.remove('safe');
             }
 
 
             // Проверяем, что пустая клетка окружена защитниками с обеих сторон
             if ((leftCell && rightCell && leftCell.classList.contains('defender') && rightCell.classList.contains('defender')) ||
                 (topCell && bottomCell && topCell.classList.contains('defender') && bottomCell.classList.contains('defender'))) {
-                cell.innerHTML = '2';
+                cell.innerHTML = '';
                 cell.classList.add('safe');
                 cell.classList.remove(pieceType);
             }
@@ -77,26 +67,39 @@ function checkSurroundingPieces() {
             }
         }
 
-        // Если клетка, куда перемещается король, установим значение "K"
         if (cell.classList.contains('king')) {
             pieceType = 'defender';
             cell.classList.remove('safe');
             if (!PieceHorizontallySurrounded(row, col, pieceType) && !PieceVerticallySurrounded(row, col, pieceType)) {
-                cell.innerHTML = 'K';
-                cell.classList.add('defender')
-            } else if (!PieceHorizontallySurrounded(row, col, 'attacker') && !PieceVerticallySurrounded(row, col, 'attacker')) {
-                // Обновляем значение клетки если король окружен атакующими фишками
                 cell.innerHTML = '';
+                cell.classList.add('defender');
+
+                let img = document.createElement('img');
+                img.src = 'static/images/king.png';
+                img.classList.add('size-image');
+                cell.appendChild(img);
+            } else if (!PieceHorizontallySurrounded(row, col, 'attacker') && !PieceVerticallySurrounded(row, col, 'attacker')) {
+                fadeOutPiece(cell, pieceType);
                 cell.classList.remove('king');
-                cell.classList.remove('defender');
-                cell.classList.remove('safe');
-                cell.classList.add('empty');
             }
         }
 
     });
 }
 
+
+function fadeOutPiece(cell, pieceType) {
+    if (cell.classList.contains('attacker') || cell.classList.contains('defender') || cell.classList.contains('king')) {
+        cell.classList.add('fade-out');
+        setTimeout(function () {
+            cell.innerHTML = '';
+            cell.classList.remove(pieceType);
+            cell.classList.remove('king');
+            cell.classList.add('empty');
+            cell.classList.remove('fade-out');
+        }, 500); // Время должно совпадать с длительностью анимации в CSS
+    }
+}
 
 function getClassSafe(row, col) {
     let cell = getCell(row, col);
@@ -160,9 +163,10 @@ function isKingSurrounded() {
         alert('Игра окончена. Король пал. Конец игры!');
         console.error('Король не найден на доске.');
         // перенаправить пользователя на другую страницу
+        localStorage.clear();
+        window.location.href = 'menu';
         return false;
     }
-        // перенаправить пользователя на другую страницу
     let kingRow = parseInt(kingCell.getAttribute('data-row'));
     let kingCol = parseInt(kingCell.getAttribute('data-col'));
 
