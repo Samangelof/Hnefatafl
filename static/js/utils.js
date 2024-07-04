@@ -86,7 +86,7 @@ function checkSurroundingPieces() {
 
     });
 }
-
+fade out piece
 
 function fadeOutPiece(cell, pieceType) {
     if (cell.classList.contains('attacker') || cell.classList.contains('defender') || cell.classList.contains('king')) {
